@@ -4,7 +4,6 @@ namespace IMEdge\RrdStructure;
 
 // DS:ds-name[=mapped-ds-name[[source-index]]]:DST:dst arguments
 use gipfl\Json\JsonSerialization;
-
 use stdClass;
 
 use function explode;
