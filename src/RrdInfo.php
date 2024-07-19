@@ -99,6 +99,7 @@ class RrdInfo implements JsonSerialization
     public function getMaxRetention(): int
     {
         $rra = $this->getRraSet()->getLongestRra();
+        assert($rra instanceof RraAggregation);
 
         return (int) ($rra->getRows() * $rra->getSteps() * $this->getStep());
     }
@@ -160,7 +161,7 @@ class RrdInfo implements JsonSerialization
 
     /**
      * Or bool|float|int|string|null?
-     * @return int|string|null
+     * @return int|float|string|null
      */
     protected static function parseValue(string $value)
     {
@@ -169,6 +170,7 @@ class RrdInfo implements JsonSerialization
         }
 
         if (strlen($value) && $value[0] === '"') {
+            // TODO: unescape?
             return trim($value, '"');
         }
 
@@ -176,12 +178,12 @@ class RrdInfo implements JsonSerialization
             return (int) $value;
         }
 
-        $value = self::optionallyParseFloat($value);
-        if ($value === false) {
+        $float = self::optionallyParseFloat($value);
+        if ($float === false) {
             throw new InvalidArgumentException($value . ' is not a known data type');
         }
 
-        return $value;
+        return $float;
     }
 
     protected static function dsListFromArray(array $info): DsList
@@ -286,6 +288,10 @@ class RrdInfo implements JsonSerialization
         }
     }
 
+    /**
+     * @param $any
+     * @return RrdInfo
+     */
     public static function fromSerialization($any): RrdInfo
     {
         if (! is_object($any)) {

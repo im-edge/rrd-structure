@@ -126,6 +126,10 @@ class DsList implements JsonSerialization
         return implode(' ', $this->list);
     }
 
+    /**
+     * @param array $any
+     * @return DsList
+     */
     public static function fromSerialization($any): DsList
     {
         $dsList = [];

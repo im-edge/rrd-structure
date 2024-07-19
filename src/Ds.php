@@ -5,6 +5,8 @@ namespace IMEdge\RrdStructure;
 // DS:ds-name[=mapped-ds-name[[source-index]]]:DST:dst arguments
 use gipfl\Json\JsonSerialization;
 
+use stdClass;
+
 use function explode;
 
 class Ds implements JsonSerialization
@@ -145,6 +147,10 @@ class Ds implements JsonSerialization
         );
     }
 
+    /**
+     * @param stdClass $any
+     * @return Ds
+     */
     public static function fromSerialization($any): Ds
     {
         if (! is_object($any)) {

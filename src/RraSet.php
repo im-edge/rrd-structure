@@ -94,7 +94,10 @@ class RraSet implements JsonSerialization
         return $rraIdx;
     }
 
-    public static function fromSerialization($any)
+    /**
+     * @return RraSet
+     */
+    public static function fromSerialization($any): RraSet
     {
         if (is_array($any)) {
             return new RraSet($any);
