@@ -3,6 +3,7 @@
 namespace IMEdge\RrdStructure;
 
 use gipfl\Json\JsonSerialization;
+use InvalidArgumentException;
 use RuntimeException;
 
 use function implode;
@@ -31,6 +32,15 @@ class DsList implements JsonSerialization
         if ($alias = $ds->getAlias()) {
             $this->aliasMap[$alias] = $ds->getName();
         }
+    }
+
+    public function requireDs(string $name): Ds
+    {
+        if (isset($this->list[$name])) {
+            return $this->list[$name];
+        }
+
+        throw new InvalidArgumentException("There is no such DS: '$name'");
     }
 
     public static function fromString(string $str): DsList
@@ -127,7 +137,15 @@ class DsList implements JsonSerialization
     }
 
     /**
-     * @param array $any
+     * @param array<object{
+     *      name: string,
+     *      type: string,
+     *      heartbeat: int,
+     *      min: ?int,
+     *      max: ?int,
+     *      mappedName: ?string,
+     *      alias: ?string,
+     *  }> $any
      * @return DsList
      */
     public static function fromSerialization($any): DsList

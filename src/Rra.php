@@ -59,7 +59,7 @@ abstract class Rra
      *
      * TODO: What does this look like for non-compute RRAs?
      *
-     * @param array $info
+     * @param array{cf: string, rows: int, xff: float, pdp_per_row: int, cur_row: ?int} $info
      * @return RraAggregation
      */
     public static function fromRraInfo(array $info): RraAggregation

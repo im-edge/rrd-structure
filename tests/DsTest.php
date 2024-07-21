@@ -51,6 +51,7 @@ class DsTest extends TestCase
     {
         $json = '{"name":"temperature","type":"GAUGE","heartbeat":8640,"min":-371,"max":10000,"alias":null,'
             . '"mappedName":null}';
+        // @phpstan-ignore-next-line
         $ds = Ds::fromSerialization(JsonString::decode($json));
         $this->assertEquals('temperature', $ds->getName());
         $this->assertEquals('GAUGE', $ds->getType());

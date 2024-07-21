@@ -10,6 +10,7 @@ use function ctype_digit;
 use function explode;
 use function is_numeric;
 use function preg_match;
+use function preg_split;
 use function str_replace;
 use function strlen;
 use function strpos;
@@ -71,6 +72,9 @@ class RrdInfo implements JsonSerialization
         return $this->dsList;
     }
 
+    /**
+     * @return string[]
+     */
     public function listDsNames(): array
     {
         return $this->dsList->listNames();
@@ -106,15 +110,24 @@ class RrdInfo implements JsonSerialization
 
     public static function parse(string $string): RrdInfo
     {
-        return static::parseLines(\preg_split('/\n/', $string, -1, PREG_SPLIT_NO_EMPTY));
+        $lines = preg_split('/\n/', $string, -1, PREG_SPLIT_NO_EMPTY);
+        if ($lines === false) {
+            throw new InvalidArgumentException('Failed to split string when parsing RrdInfo: ' . $string);
+        }
+
+        return static::parseLines($lines);
     }
 
+    /**
+     * @param string[] $lines
+     * @return RrdInfo
+     */
     public static function parseLines(array $lines): RrdInfo
     {
         return static::instanceFromParsedStructure(static::prepareStructure($lines));
     }
 
-    protected static function detectLineFormat($line): int
+    protected static function detectLineFormat(string $line): int
     {
         return false === strpos($line, ' = ')
             ? self::FORMAT_RRDCACHED
@@ -122,8 +135,8 @@ class RrdInfo implements JsonSerialization
     }
 
     /**
-     * @param array $lines
-     * @return array
+     * @param string[] $lines
+     * @return array<string, array<string, array<string, string|float|int|null>>>
      */
     protected static function prepareStructure(array $lines): array
     {
@@ -144,6 +157,9 @@ class RrdInfo implements JsonSerialization
         return $result;
     }
 
+    /**
+     * @return RrdInfo
+     */
     protected static function instanceFromParsedStructure(array $array): RrdInfo
     {
         $self = new RrdInfo(
@@ -186,6 +202,18 @@ class RrdInfo implements JsonSerialization
         return $float;
     }
 
+    /**
+     * @param array<string, array{
+     *      index: int,
+     *      value: int|float|null,
+     *      type: string,
+     *      minimal_heartbeat: int,
+     *      min: ?int,
+     *      max: ?int,
+     *      last_ds: ?string,
+     *      unknown_sec: ?int
+     *   }> $info
+     */
     protected static function dsListFromArray(array $info): DsList
     {
         $list = new DsList();
@@ -196,6 +224,9 @@ class RrdInfo implements JsonSerialization
         return $list;
     }
 
+    /**
+     * @param array<array{cf: string, rows: int, xff: float, pdp_per_row: int, cur_row: ?int}> $info
+     */
     protected static function rraInfoFromArray(array $info): RraSet
     {
         $rraSet = [];
@@ -221,12 +252,18 @@ class RrdInfo implements JsonSerialization
         }
     }
 
+    /**
+     * @return array{0: string, 1: string|int|float|null}
+     */
     protected static function splitKeyValueFromRrdTool(string $line): array
     {
         list($key, $val) = explode(' = ', $line);
         return [$key, self::parseValue($val)];
     }
 
+    /**
+     * @return array{0: string, 1: string|int|float|null}
+     */
     protected static function splitKeyValueFromRrdCached(string $line): array
     {
         if (preg_match('/^(.+?)\s([012])\s(.+)$/', $line, $match)) {
@@ -261,8 +298,8 @@ class RrdInfo implements JsonSerialization
     }
 
     /**
-     * @param array<string, array<string, array<string, float|int|null>>> $array
-     * @param float|int|null $value
+     * @param array<string, array<string, array<string, string|float|int|null>>> $array
+     * @param string|float|int|null $value
      */
     protected static function setArrayValue(array &$array, string $key, $value): void
     {
@@ -289,7 +326,6 @@ class RrdInfo implements JsonSerialization
     }
 
     /**
-     * @param $any
      * @return RrdInfo
      */
     public static function fromSerialization($any): RrdInfo
@@ -310,6 +346,9 @@ class RrdInfo implements JsonSerialization
         if (isset($any->lastUpdate)) {
             $self->lastUpdate = $any->lastUpdate;
         }
+        if (isset($any->headerSize)) {
+            $self->headerSize = $any->headerSize;
+        }
 
         return $self;
     }
@@ -323,6 +362,7 @@ class RrdInfo implements JsonSerialization
             'rra'        => $this->rra,
             'rrdVersion' => $this->rrdVersion,
             'lastUpdate' => $this->lastUpdate,
+            'headerSize' => $this->headerSize,
         ];
     }
 }

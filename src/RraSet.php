@@ -4,6 +4,7 @@ namespace IMEdge\RrdStructure;
 
 use gipfl\Json\JsonSerialization;
 use InvalidArgumentException;
+use RuntimeException;
 
 use function explode;
 use function implode;
@@ -95,6 +96,7 @@ class RraSet implements JsonSerialization
     }
 
     /**
+     * @param string|string[]|mixed $any
      * @return RraSet
      */
     public static function fromSerialization($any): RraSet
@@ -105,7 +107,7 @@ class RraSet implements JsonSerialization
             return RraSet::fromString($any);
         }
 
-        throw new \RuntimeException(sprintf('Cannot un-serialize %s into RraSet', get_debug_type($any)));
+        throw new RuntimeException(sprintf('Cannot un-serialize %s into RraSet', get_debug_type($any)));
     }
 
     public function jsonSerialize(): string

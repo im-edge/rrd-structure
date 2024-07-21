@@ -4,7 +4,6 @@ namespace IMEdge\RrdStructure;
 
 // DS:ds-name[=mapped-ds-name[[source-index]]]:DST:dst arguments
 use gipfl\Json\JsonSerialization;
-use stdClass;
 
 use function explode;
 
@@ -147,15 +146,19 @@ class Ds implements JsonSerialization
     }
 
     /**
-     * @param stdClass $any
+     * @param object{
+     *     name: string,
+     *     type: string,
+     *     heartbeat: int,
+     *     min: ?int,
+     *     max: ?int,
+     *     mappedName: ?string,
+     *     alias: ?string,
+     * } $any
      * @return Ds
      */
     public static function fromSerialization($any): Ds
     {
-        if (! is_object($any)) {
-            throw new \RuntimeException('Cannot instantiate a DS from  ' . get_debug_type($any));
-        }
-
         return new Ds(
             $any->name,
             $any->type,

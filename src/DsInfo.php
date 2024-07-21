@@ -37,7 +37,19 @@ class DsInfo
         $this->name = $name;
     }
 
-    public static function fromArray($name, $values): DsInfo
+    /**
+     * @param array{
+     *     index: int,
+     *     value: int|float|null,
+     *     type: string,
+     *     minimal_heartbeat: int,
+     *     min: ?int,
+     *     max: ?int,
+     *     last_ds: ?string,
+     *     unknown_sec: ?int
+     *  } $values
+     */
+    public static function fromArray(string $name, array $values): DsInfo
     {
         $info = new DsInfo($name);
         foreach ($values as $arrayKey => $value) {
@@ -45,6 +57,7 @@ class DsInfo
                 case 'index':
                 case 'type':
                 case 'min':
+                case 'max':
                 case 'value':
                     $info->$arrayKey = $value;
                     break;
@@ -52,7 +65,7 @@ class DsInfo
                     $info->minimalHeartbeat = $value;
                     break;
                 case 'last_ds':
-                    $info->lastDs = $value;
+                    $info->lastDs = (string) $value; // Why string?
                     break;
                 case 'unknown_sec':
                     $info->unknownSec = $value;
