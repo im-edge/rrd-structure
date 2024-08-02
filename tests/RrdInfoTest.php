@@ -36,6 +36,10 @@ class RrdInfoTest extends TestCase
             RrdInfo::parse($this->loadSample('rrdcached-info.en_US')),
             self::DATA_DIR . '/' . self::RELATIVE_FILENAME
         );
+        $this->runContentTests(
+            RrdInfo::parse($this->loadSample('rrdcached-info.en_US'), self::DATA_DIR),
+            self::RELATIVE_FILENAME
+        );
     }
 
     public function testCanBeRestoredFromJson(): void

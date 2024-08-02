@@ -108,23 +108,22 @@ class RrdInfo implements JsonSerialization
         return (int) ($rra->getRows() * $rra->getSteps() * $this->getStep());
     }
 
-    public static function parse(string $string): RrdInfo
+    public static function parse(string $string, ?string $dataDir = null): RrdInfo
     {
         $lines = preg_split('/\n/', $string, -1, PREG_SPLIT_NO_EMPTY);
         if ($lines === false) {
             throw new InvalidArgumentException('Failed to split string when parsing RrdInfo: ' . $string);
         }
 
-        return static::parseLines($lines);
+        return static::parseLines($lines, $dataDir);
     }
 
     /**
      * @param string[] $lines
-     * @return RrdInfo
      */
-    public static function parseLines(array $lines): RrdInfo
+    public static function parseLines(array $lines, ?string $dataDir = null): RrdInfo
     {
-        return static::instanceFromParsedStructure(static::prepareStructure($lines));
+        return static::instanceFromParsedStructure(static::prepareStructure($lines), $dataDir);
     }
 
     protected static function detectLineFormat(string $line): int
@@ -160,10 +159,18 @@ class RrdInfo implements JsonSerialization
     /**
      * @return RrdInfo
      */
-    protected static function instanceFromParsedStructure(array $array): RrdInfo
+    protected static function instanceFromParsedStructure(array $array, ?string $dataDir = null): RrdInfo
     {
+        $filename = $array['filename'];
+        if ($dataDir) {
+            $dataDir = rtrim($dataDir, '/') . '/';
+            if (str_starts_with($filename, $dataDir)) {
+                $filename = substr($filename, strlen($dataDir));
+            }
+        }
+
         $self = new RrdInfo(
-            $array['filename'],
+            $filename,
             $array['step'],
             self::dsListFromArray($array['ds']),
             self::rraInfoFromArray($array['rra'])
