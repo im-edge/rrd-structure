@@ -25,7 +25,7 @@
     "require": {
         "php": ">=7.4",
         "ext-ctype": "*",
-        "gipfl/json": ">=0.2"
+        "imedge/json": ">=0.1"
     },
     "require-dev": {
         "ext-json": "*",
