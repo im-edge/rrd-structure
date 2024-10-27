@@ -2,7 +2,7 @@
 
 namespace IMEdge\Tests\RrdStructure;
 
-use gipfl\Json\JsonString;
+use IMEdge\Json\JsonString;
 use IMEdge\RrdStructure\Ds;
 use PHPUnit\Framework\TestCase;
 
