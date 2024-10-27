@@ -164,7 +164,7 @@ class RrdInfo implements JsonSerialization
         $filename = $array['filename'];
         if ($dataDir) {
             $dataDir = rtrim($dataDir, '/') . '/';
-            if (str_starts_with($filename, $dataDir)) {
+            if (strpos($filename, $dataDir) === 0) {
                 $filename = substr($filename, strlen($dataDir));
             }
         }
