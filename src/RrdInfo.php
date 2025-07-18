@@ -135,7 +135,24 @@ class RrdInfo implements JsonSerialization
 
     /**
      * @param string[] $lines
-     * @return array<string, array<string, array<string, string|float|int|null>>>
+     * @return array{
+     *       filename: string,
+     *       step: int,
+     *       ds: array<string, array{
+     *          index: int,
+     *          value: int|float|null,
+     *          type: string,
+     *          minimal_heartbeat: int,
+     *          min: ?int,
+     *          max: ?int,
+     *          last_ds: ?string,
+     *          unknown_sec: ?int
+     *       }>,
+     *       rra: array<array{cf: string, rows: int, xff: float, pdp_per_row: int, cur_row: ?int}>,
+     *       rrd_version: ?string,
+     *       last_update: ?int,
+     *       header_size: ?int
+     *   }
      */
     protected static function prepareStructure(array $lines): array
     {
@@ -157,6 +174,24 @@ class RrdInfo implements JsonSerialization
     }
 
     /**
+     * @param array{
+     *      filename: string,
+     *      step: int,
+     *      ds: array<string, array{
+     *         index: int,
+     *         value: int|float|null,
+     *         type: string,
+     *         minimal_heartbeat: int,
+     *         min: ?int,
+     *         max: ?int,
+     *         last_ds: ?string,
+     *         unknown_sec: ?int
+     *      }>,
+     *      rra: array<array{cf: string, rows: int, xff: float, pdp_per_row: int, cur_row: ?int}>,
+     *      rrd_version: ?string,
+     *      last_update: ?int,
+     *      header_size: ?int
+     *  } $array
      * @return RrdInfo
      */
     protected static function instanceFromParsedStructure(array $array, ?string $dataDir = null): RrdInfo
@@ -339,6 +374,18 @@ class RrdInfo implements JsonSerialization
     {
         if (! is_object($any)) {
             throw new RuntimeException('Cannot un-serialize RrdInfo from ' . get_debug_type($any));
+        }
+        if (! isset($any->filename)) {
+            throw new InvalidArgumentException("'filename' is required for RrrdInfo");
+        }
+        if (! isset($any->step)) {
+            throw new InvalidArgumentException("'step' is required for RrrdInfo");
+        }
+        if (! isset($any->ds)) {
+            throw new InvalidArgumentException("'ds' is required for RrrdInfo");
+        }
+        if (! isset($any->rra)) {
+            throw new InvalidArgumentException("'rra' is required for RrrdInfo");
         }
         $self = new RrdInfo(
             $any->filename,
